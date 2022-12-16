@@ -1,0 +1,6 @@
+create pipeline
+create pipeline s3 bucket
+create pipeline and buildspec roles add admin permission to them
+create ecr private repository
+create acm certificate
+
