@@ -4,6 +4,9 @@ Parameters:
   WebAppBucketName:
     Description: S3Bucket Name for Frond End files
     Type: String
+  ProjectName:
+    Description: Project Name for Project Tags
+    Type: String
   TagStackType:
     Type: String
     Default: POC
@@ -15,8 +18,8 @@ Parameters:
       - PROD
 
 Resources:
-# The following  will create a S3 bucket for the frontend files
 
+# The following  will create a S3 bucket for the frontend files
   WebAppBucket:
     Type: AWS::S3::Bucket
     # DeletePolicy: "Retain"
@@ -49,13 +52,17 @@ Resources:
           Value: !Ref TagStackType
         - Key: Application Support
           Value: chinmay 
-        - Key: PID
+        - Key: ProjectID
           Value: "0001"
         - Key: Owner
           Value: chinmay
         - Key: Owner Supervisor
           Value: chinmay
         - Key: Project Name
-          Value: MYProject
+          Value: !Ref ProjectName
         - Key: Business Vertical
           Value: product
+        - Key: Deployment Type
+          Value: CI/CD
+        - Key: Provisioning SR
+          Value: NA
