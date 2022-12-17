@@ -3,12 +3,18 @@ Transform: AWS::Serverless-2016-10-31
 Description: 
   Cloud distribution
 Parameters:
-  DomainRoot:
+  # DomainRoot:
+  #   Type: String
+  #   Description: (Required) Enter root domain name.
+  # DomainName:
+  #   Type: String
+  #   Description: (Required) Enter root domain name.
+  ProjectName:
+    Description: Project Name for Project Tags
     Type: String
-    Description: (Required) Enter root domain name.
-  DomainName:
+  ApplicationName:
+    Description: Project Name for Project Tags
     Type: String
-    Description: (Required) Enter root domain name.
   S3BucketName:
     Type: String
     Description: (Required) Frontend bucket name.
@@ -21,9 +27,9 @@ Parameters:
     Description: (Required) Enter poc, dev uat prod. Default is poc.
     AllowedValues:
       - POC
-      - Development
+      - Dev
       - UAT
-      - Production
+      - PROD
 
 Resources: 
 # The following will create a cloudfrontOriginAccessIdentity resource
@@ -53,7 +59,6 @@ Resources:
                  -  '.s3.'
                  -  Ref: S3BucketRegion
                  -  '.amazonaws.com'
-                 #  -.s3.amazonaws.com
           Id:
             Fn::Join:
               - ''
@@ -69,7 +74,7 @@ Resources:
                   - 'origin-access-identity/cloudfront/'
                   -  Ref: CloudFrontOAI
         Enabled: true 
-        Comment: MYproject frontend cloud distribution 
+        Comment: !Sub '${ProjectName} frontend cloud distribution'
         DefaultRootObject: index.html
         CacheBehaviors:
         - CachePolicyId: !Ref WebAppBucketCachePolicyCoreinfra
@@ -167,33 +172,25 @@ Resources:
         - Key: Purpose
           Value: Cloudfront is web service that speeds up distribution of your static and dynamic web content
         - Key: Role
-          Value: To serve static and dynamic web content for myproject  
+          Value: !Sub 'To serve static and dynamic web content for ${ProjectName}'
         - Key: Stack
           Value: !Ref TagStackType
-        - Key: PID
-          Value: "10124101"
+        - Key: Application Support
+          Value: chinmay 
+        - Key: ProjectID
+          Value: "0001"
         - Key: Owner
           Value: chinmay
         - Key: Owner Supervisor
-          Value: chinmay@aiolos.cloud
+          Value: chinmay
         - Key: Project Name
-          Value: ----
+          Value: !Ref ProjectName
         - Key: Business Vertical
-          Value: TAS  
-        - Key: SDO Code
-          Value: '1001'
-        - Key: Service Type
-          Value: 'PAAS'
+          Value: product
+        - Key: Deployment Type
+          Value: CI/CD
         - Key: Provisioning SR
           Value: NA
-        - Key: Deployment Type
-          Value: CICD
-        - Key: Region
-          Value: !Sub "${AWS::Region}"
-        - Key: Vendor
-          Value: AWS
-
-
 
 
 # The following will attach access policy to bucket using cloudfrontoriginaccessindentity
@@ -221,7 +218,7 @@ Resources:
     Type: AWS::CloudFront::CachePolicy
     Properties:
       CachePolicyConfig:
-          Comment: "myprojectCoreinfra-cache-policy2"
+          Comment: !Sub '${ProjectName}Coreinfra-cache-policy2'
           DefaultTTL: 300
           MaxTTL: 300
           MinTTL: 1
@@ -229,7 +226,7 @@ Resources:
               Fn::Join: 
               - ''
               -
-                - 'myprojectCoreinfra-cache-policy'
+                - !Sub '${ProjectName}Coreinfra-cache-policy'
                 - Ref: CloudFrontOAI
 
           ParametersInCacheKeyAndForwardedToOrigin:
@@ -247,7 +244,7 @@ Resources:
     Type: AWS::CloudFront::OriginRequestPolicy
     Properties:
       OriginRequestPolicyConfig:
-        Comment: "myprojectCoreinfra-origin-CORS-S3origin-policy2"
+        Comment: !Sub '${ProjectName}Coreinfra-origin-CORS-S3origin-policy2'
         CookiesConfig:
           CookieBehavior: 'none'
         HeadersConfig:
@@ -255,13 +252,13 @@ Resources:
           Headers:
             - origin
             - access-control-request-headers
-            -  access-control-request-method
+            - access-control-request-method
 
         Name:
             Fn::Join:
               - ''
               -
-                - 'myprojectCoreinfra-origin-CORS-S3origin-policy'
+                - !Sub '${ProjectName}Coreinfra-origin-CORS-S3origin-policy'
                 - Ref: CloudFrontOAI
         QueryStringsConfig:
           QueryStringBehavior: "none"
@@ -270,22 +267,19 @@ Resources:
   CloudfrontDistributionARN:
     Type: AWS::SSM::Parameter
     Properties:
-      Name: '/cloudfront/distribution/ARN'
+      Name: !Sub '/${ProjectName}/${ApplicationName}/cloudfront/distribution/ARN'
       Type: String
       Value: !Sub 'arn:aws:cloudfront::${AWS::AccountId}:distribution/${CloudDistribution}'
       Tags:
-        Name: "/cloudfront/distribution/ARN"
-        PID: "91604280"
+        Name: !Sub '/${ProjectName}/${ApplicationName}/Cloudfront/distribution/ARN'
+        PID: "0001"
         Owner: "chinmay"
         Owner Supervisor: chinmay
         Purpose: cloud front distribution ARN to create invaliddations or any other purpose
         Role:   cloud front distribution ARN to create invaliddations or any other purpose
-        Project Name: myproject
-        Business Vertical: TAS 
+        Project Name: !Ref ProjectName
         Stack: !Ref TagStackType
-        SDO Code: "1001"
-        CC Code: "1001"
-        Service Type: PAAS 
+        Service Type: PAAS
         Provisioning SR: NA 
         Deployment Type: CI/CD 
         Region: !Sub "${AWS::Region}"
@@ -294,28 +288,20 @@ Resources:
   CloudfrontDistributionID:
     Type: AWS::SSM::Parameter
     Properties:
-      Name: '/myproject/cloudfront/distribution/ID'
+      Name: !Sub '/${ProjectName}/${ApplicationName}/cloudfront/distribution/ID'
       Type: String 
       Value: !Ref CloudDistribution
       Tags:
-        Name: "/myproject/Cloudfront/distribution/ID"
-        PID: "91604280"
+        Name: !Sub '/${ProjectName}/${ApplicationName}/Cloudfront/distribution/ID'
+        PID: "0001"
         Owner: "chinmay"
         Owner Supervisor: chinmay
         Purpose: cloud front distribution ARN to create invaliddations or any other purpose
         Role:   cloud front distribution ARN to create invaliddations or any other purpose
-        Project Name: myproject
-        Business Vertical: TAS 
+        Project Name: !Ref ProjectName
         Stack: !Ref TagStackType
-        SDO Code: "1001"
-        CC Code: "1001"
         Service Type: PAAS 
         Provisioning SR: NA 
         Deployment Type: CI/CD 
         Region: !Sub "${AWS::Region}"
-        Vendor: AWS       
-
-
-
-
-
+        Vendor: AWS
